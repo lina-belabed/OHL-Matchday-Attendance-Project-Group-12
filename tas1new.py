@@ -4,22 +4,20 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
-
-# Optional heatmap and boxplot
 import seaborn as sns
 
-# -----------------------------
+
 # 1. Load datasets
-# -----------------------------
+
 tickets = pd.read_csv("gold_match_tickets.csv")
 context = pd.read_csv("gold_match_context.csv")
 
 tickets.columns = tickets.columns.str.strip()
 context.columns = context.columns.str.strip()
 
-# -----------------------------
+
 # 2. Select relevant features
-# -----------------------------
+
 tickets_df = tickets[
     [
         "match_id",
@@ -40,14 +38,14 @@ context_df = context[
     ]
 ]
 
-# -----------------------------
+
 # 3. Merge datasets
-# -----------------------------
+
 df = pd.merge(tickets_df, context_df, on="match_id", how="inner")
 
-# -----------------------------
+
 # 4. Data cleaning
-# -----------------------------
+
 df["has_promotion"] = df["has_promotion"].astype(str).str.lower().map({
     "true": 1,
     "false": 0,
@@ -63,21 +61,21 @@ df["has_promotion"] = df["has_promotion"].fillna(0)
 # Drop rows with missing important values
 df = df.dropna()
 
-# -----------------------------
+
 # 5. Feature engineering
-# -----------------------------
+
 df["paid_tickets"] = df["tickets_sold_b2c"] + df["tickets_sold_b2b"]
 df["promo_ratio"] = df["promo_tickets_total"] / df["tickets_sold_total"]
 df["seasonpass_ratio"] = df["seasonpass_holders"] / df["tickets_sold_total"]
 
-# Ticket composition
+
 df["seasonpass_pct"] = df["seasonpass_holders"] / df["tickets_sold_total"]
 df["b2c_pct"] = df["tickets_sold_b2c"] / df["tickets_sold_total"]
 df["b2b_pct"] = df["tickets_sold_b2b"] / df["tickets_sold_total"]
 
-# -----------------------------
-# 6. Exploratory statistics
-# -----------------------------
+
+# 6. Analysis
+
 print("\n================ SUMMARY STATISTICS ================")
 print(df.describe())
 
@@ -89,9 +87,9 @@ print("\n================ FULL CORRELATION MATRIX ================")
 corr_matrix = df.corr(numeric_only=True)
 print(corr_matrix)
 
-# -----------------------------
+
 # 7. Promotion impact analysis
-# -----------------------------
+
 print("\n================ PROMOTION IMPACT ================")
 promotion_effect = df.groupby("has_promotion")[
     ["tickets_sold_total", "promo_tickets_total", "pct_free_tickets"]
@@ -102,23 +100,23 @@ print("\n================ PROMOTION DISTRIBUTION ================")
 promo_sales = df.groupby("has_promotion")["tickets_sold_total"].describe()
 print(promo_sales)
 
-# -----------------------------
+
 # 8. Promotion name analysis
-# -----------------------------
+
 print("\n================ PROMOTION TYPE ANALYSIS ================")
 promotion_performance = df.groupby("promotion_names")["tickets_sold_total"].mean().sort_values(ascending=False)
 print(promotion_performance)
 
-# -----------------------------
+
 # 9. Ticket sales composition
-# -----------------------------
+
 print("\n================ AVERAGE TICKET COMPOSITION ================")
 composition = df[["seasonpass_pct", "b2c_pct", "b2b_pct"]].mean()
 print(composition)
 
-# -----------------------------
+
 # 10. Demand segmentation
-# -----------------------------
+
 df["demand_level"] = pd.qcut(df["tickets_sold_total"], q=3, labels=["Low", "Medium", "High"])
 
 print("\n================ DEMAND SEGMENTATION ================")
@@ -127,9 +125,9 @@ demand_analysis = df.groupby("demand_level")[
 ].mean()
 print(demand_analysis)
 
-# -----------------------------
+
 # 11. Outlier detection
-# -----------------------------
+
 q1 = df["tickets_sold_total"].quantile(0.25)
 q3 = df["tickets_sold_total"].quantile(0.75)
 iqr = q3 - q1
@@ -145,9 +143,9 @@ if len(outliers) == 0:
 else:
     print(outliers)
 
-# -----------------------------
+
 # 12. Regression model
-# -----------------------------
+
 features = [
     "seasonpass_holders",
     "tickets_sold_b2c",
@@ -180,9 +178,9 @@ coefficients = pd.DataFrame({
 print("\nFeature importance:")
 print(coefficients.sort_values(by="Impact_on_ticket_sales", ascending=False))
 
-# -----------------------------
+
 # 13. Visualizations
-# -----------------------------
+
 
 # Scatter plot: promo tickets vs total sales
 plt.figure(figsize=(8, 5))
