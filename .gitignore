@@ -22,5 +22,8 @@ data/temp/
 .DS_Store
 Thumbs.db
 
+# Generated model artifacts (regenerate with: python src/model.py)
+models/
+
 # Logs
 *.log
